@@ -1,18 +1,20 @@
 import { Mail, Globe, Sparkles } from 'lucide-react';
+import steelLogo from '../assets/steel-logo.svg';
+import shopifyLogo from '../assets/shopify-logo.svg';
 
 export default function Sponsors() {
   const premierSponsors = [
     {
       name: 'Shopify',
-      logoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBfjJ_-ouDI70Y04SJtKHUpCboQ2hQHhYQ6E8k6lvc8R_1ZTpyH3DLahVoKpEx493kODnFakszDQNV5QUOD9oI8aAkAM6iiUDBmp7Kmg6cbuuQjoz1_K0FyKw_XldK4uIO3Ge_czKjNqUJFcfLmXf3iGp_RYsCwtOHZh5lubwXOJ1jdjJGNSh95hevJrMWRKPNld7MDXhhzbqC4LU4otN9jCMBU791J4FKJGk5XcB7roaTqrMSvJ5yuwMkQ1JJm0uu1PyUAtoKf3ts',
+      logoUrl: shopifyLogo,
       web: 'https://shopify.com',
       borderGlow: 'hover:border-green-500/40 hover:shadow-[0_0_30px_rgba(34,197,94,0.15)]'
     },
     {
-      name: 'Anthropic',
-      logoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCPG1r6PaSYhFaWopUbMNRVRcuNU0WqnvXnnMUkhRBs7y-UzEoVJ-qu-AjS3XcultHR_KLiPR-F5Cq0PMxt0zQjMZFEJRHzlOt4oKO1wKBMenKUvL4xHNdXe7TY0KGVx-xVsXtyHRoemokNl5CWKBSuff2Juw2UKTwwYGGa4AqrtJBR9SpnPf8oMk268qioT6eQHQglFF1BUnsMTjuerpDiAPCUM1Jwrks4VRphOLbdq_yfVdJIljWNHe4iq4iuNtQ7lFGe6YJjgtk',
-      web: 'https://anthropic.com',
-      borderGlow: 'hover:border-amber-500/40 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)]'
+      name: 'Steel',
+      logoUrl: steelLogo,
+      web: 'https://steel.dev',
+      borderGlow: 'hover:border-yellow-400/50 hover:shadow-[0_0_30px_rgba(245,217,10,0.18)]'
     }
   ];
 
@@ -58,6 +60,16 @@ export default function Sponsors() {
                 </span>
               </a>
             ))}
+
+            {/* More sponsors to come */}
+            <div className="relative flex flex-col items-center justify-center gap-2 w-full max-w-[320px] h-36 rounded-2xl border border-dashed border-primary/25 bg-primary/[0.03] text-center">
+              <span className="font-display text-2xl font-black uppercase tracking-wider text-primary-fixed-dim">
+                & More
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-on-surface-variant">
+                Coming Soon
+              </span>
+            </div>
           </div>
 
           <div className="mt-16 text-center space-y-4">

@@ -1,44 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Calendar, MapPin, Terminal } from 'lucide-react';
 import handImg from '../assets/hand.png';
 import wataiLogoImg from '../assets/wat-ai-logo.avif';
 import utmistLogoWithTextImg from '../assets/utmist-logo-with-text.png';
 
 export default function Hero() {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-    isExpired: false
-  });
-
   const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    const targetDate = new Date('2026-06-26T09:00:00-04:00');
-
-    const updateTimer = () => {
-      const difference = +targetDate - +new Date();
-      
-      if (difference <= 0) {
-        setTimeLeft(prev => ({ ...prev, isExpired: true }));
-        return;
-      }
-
-      setTimeLeft({
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-        isExpired: false
-      });
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleScroll = (selector) => {
     const el = document.querySelector(selector);
@@ -70,7 +37,7 @@ export default function Hero() {
             TORONTO, ONTARIO, CANADA
             <span className="h-1.5 w-1.5 rounded-full bg-primary/45" /> 
             <Calendar size={14} className="text-primary" />
-            LATE JUNE 2026
+            LATE SUMMER 2026
           </span>
         </div>
 
@@ -129,37 +96,6 @@ export default function Hero() {
             View Missions
           </button> */}
         </div>
-
-        {!timeLeft.isExpired && (
-          <div className="glass-panel max-w-3xl mx-auto p-8 rounded-3xl border border-primary/10 backdrop-blur-2xl">
-            <div className="text-center font-mono text-[10px] uppercase tracking-[0.25em] text-outline mb-4 font-bold flex items-center justify-center gap-2">
-              <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-              HACKATHON STARTS IN
-            </div>
-            
-            <div className="grid grid-cols-4 gap-4 sm:gap-6 text-center">
-              {[
-                { label: 'Days', value: timeLeft.days },
-                { label: 'Hours', value: timeLeft.value !== undefined ? timeLeft.hours : timeLeft.hours },
-                { label: 'Min', value: timeLeft.minutes },
-                { label: 'Sec', value: timeLeft.seconds }
-              ].map((timeUnit, i) => (
-                <div key={timeUnit.label} className="relative py-2 sm:py-4">
-                  <div className="absolute inset-0 bg-primary/5 rounded-2xl" />
-                  <div className="relative font-mono text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-on-surface to-on-surface-variant drop-shadow-[0_0_8px_rgba(255,255,255,0.15)] leading-none mb-2">
-                    {String(timeUnit.value).padStart(2, '0')}
-                  </div>
-                  <div className="font-sans text-[10px] sm:text-xs uppercase tracking-widest text-primary-fixed-dim font-bold">
-                    {timeUnit.label}
-                  </div>
-                  {i < 3 && (
-                    <span className="hidden sm:block absolute top-1/2 -right-3 -translate-y-1/2 font-mono text-2xl text-primary/30">:</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
