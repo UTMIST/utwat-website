@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { HeartPulse, FlaskConical, Cpu, ArrowRight, ShieldCheck, Database, Award } from 'lucide-react';
+import { useState } from 'react';
+import { HeartPulse, FlaskConical, Cpu, ShieldCheck, Database, Award } from 'lucide-react';
 
 export default function Missions() {
   const [activeTrack, setActiveTrack] = useState('health');

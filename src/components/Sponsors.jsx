@@ -1,4 +1,3 @@
-import React from 'react';
 import { Mail, Globe, Sparkles } from 'lucide-react';
 
 export default function Sponsors() {

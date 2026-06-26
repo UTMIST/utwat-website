@@ -1,4 +1,3 @@
-import React from 'react';
 import { Globe, Mail, Terminal } from 'lucide-react';
 
 export default function Footer() {

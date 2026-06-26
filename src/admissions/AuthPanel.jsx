@@ -1,0 +1,104 @@
+import { useState } from 'react';
+import { Mail, Send } from 'lucide-react';
+import { isSupabaseConfigured, supabase } from './supabaseClient';
+
+export default function AuthPanel({ redirectPath = '/apply' }) {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState('');
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setStatus('');
+
+    if (!isSupabaseConfigured) {
+      setError(
+        'Supabase is not configured yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your local environment.',
+      );
+      return;
+    }
+
+    setSending(true);
+    const { error: authError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}${redirectPath}`,
+      },
+    });
+    setSending(false);
+
+    if (authError) {
+      setError(authError.message);
+      return;
+    }
+
+    setStatus('Check your inbox for a secure sign-in link.');
+  };
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="glass-panel rounded-3xl border border-primary/10 bg-surface-container-lowest/80 p-8 backdrop-blur-2xl">
+        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+          <Mail size={22} />
+        </div>
+        <h2 className="font-display text-2xl font-black uppercase text-white">
+          Sign In With Email
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">
+          Enter the email you want tied to your application. We will send a
+          passwordless link, then bring you back here to continue.
+        </p>
+
+        <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+          <label className="block">
+            <span className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-widest text-outline">
+              Email Address
+            </span>
+            <input
+              className="w-full rounded-xl border border-primary/10 bg-surface-container-lowest/90 px-4 py-4 text-sm text-white outline-none transition-all placeholder:text-outline focus:border-primary/50 focus:shadow-[0_0_20px_rgba(46,91,255,0.15)]"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@school.edu"
+              required
+            />
+          </label>
+
+          {error && (
+            <div className="rounded-xl border border-rose-400/20 bg-rose-950/20 px-4 py-3 text-sm text-rose-200">
+              {error}
+            </div>
+          )}
+
+          {status && (
+            <div className="rounded-xl border border-emerald-400/20 bg-emerald-950/20 px-4 py-3 text-sm text-emerald-200">
+              {status}
+            </div>
+          )}
+
+          <button
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-cyber-blue to-primary-container px-8 py-4 text-sm font-bold uppercase tracking-widest text-white shadow-glow-blue transition-all hover:scale-[1.01] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={sending}
+            type="submit"
+          >
+            <Send size={16} className="text-secondary-fixed" />
+            {sending ? 'Sending...' : 'Send Sign-In Link'}
+          </button>
+        </form>
+      </div>
+
+      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8">
+        <h3 className="font-display text-lg font-bold uppercase text-white">
+          What You Can Do Here
+        </h3>
+        <div className="mt-6 space-y-4 text-sm leading-relaxed text-on-surface-variant">
+          <p>Save your draft before the deadline.</p>
+          <p>Upload an optional PDF resume and share project links.</p>
+          <p>Submit once, then track your admissions status from the dashboard.</p>
+        </div>
+      </div>
+    </div>
+  );
+}

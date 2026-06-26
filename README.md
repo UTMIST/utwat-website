@@ -1,16 +1,32 @@
-# React + Vite
+# Battle of the Schools Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Single-page event website plus a Supabase-backed admissions portal for BOTS 2026.
 
-Currently, two official plugins are available:
+## Routes
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `/` - current public landing page.
+- `/apply` - applicant admissions portal.
+- `/apply/admin` - organizer admissions console.
 
-## React Compiler
+## Local Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
 
-## Expanding the ESLint configuration
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env.local` before using the portal.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Supabase Setup
+
+Apply the migration in `supabase/migrations/202606200001_admissions_portal.sql`, then deploy the `admin-applications` Edge Function.
+
+The function needs these secrets:
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=...
+ADMIN_EMAIL_ALLOWLIST=organizer1@example.com,organizer2@example.com
+```
+
+Applicants authenticate with passwordless email OTP. Admin access is granted only to authenticated users whose email is in `ADMIN_EMAIL_ALLOWLIST`.

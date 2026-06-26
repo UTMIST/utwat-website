@@ -17,7 +17,6 @@ export default {
         "on-surface-variant": "#c4c5d9",
         "on-secondary-fixed-variant": "#544600",
         "on-error-container": "#ffdad6",
-        "on-secondary-container": "#725f00",
         "surface-bright": "#373943",
         "background": "#11131c",
         "surface-container-lowest": "#0c0e17",

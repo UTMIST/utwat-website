@@ -1,4 +1,3 @@
-import React from 'react';
 import { Flame, Construction, Bot } from 'lucide-react';
 
 export default function About() {

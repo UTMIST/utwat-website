@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BookOpen, GraduationCap, Award, Compass, Users, Network, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { BookOpen, GraduationCap, Compass, Users, Network, TrendingUp } from 'lucide-react';
 import wataiLogoImg from '../assets/wat-ai-logo.avif';
 import utmistLogoImg from '../assets/utmist-logo.png';
 import utmistLogoWithTextImg from '../assets/utmist-logo-with-text.png';

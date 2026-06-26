@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { HelpCircle, ChevronDown, ChevronUp, Search, Info } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown, Search, Info } from 'lucide-react';
 
 export default function Faq() {
   const [searchTerm, setSearchTerm] = useState('');

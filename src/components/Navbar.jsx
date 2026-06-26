@@ -1,25 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import wataiLogoImg from '../assets/wat-ai-logo.avif';
 import utmistLogoWithTextImg from '../assets/utmist-logo-with-text.png';
+
+const NAV_LINKS = [
+  { name: 'About', href: '#about' },
+  // { name: 'Mission', href: '#missions' },
+  { name: 'Organizers', href: '#organizations' },
+  { name: 'Sponsors', href: '#sponsors' },
+  { name: 'FAQ', href: '#faq' }
+];
+
+// Flip to true to re-open applications (re-enables the Apply button).
+const APPLICATIONS_OPEN = false;
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
 
-  const navLinks = [
-    { name: 'About', href: '#about' },
-    // { name: 'Mission', href: '#missions' },
-    { name: 'Organizers', href: '#organizations' },
-    { name: 'Sponsors', href: '#sponsors' },
-    { name: 'FAQ', href: '#faq' }
-  ];
-
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 120; // Offset for header height
 
-      for (const link of navLinks) {
+      for (const link of NAV_LINKS) {
         const el = document.querySelector(link.href);
         if (el) {
           const top = el.offsetTop;
@@ -44,6 +47,14 @@ export default function Navbar() {
   const handleNavClick = (e, href) => {
     e.preventDefault();
     setIsOpen(false);
+    if (href === '#') {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      return;
+    }
+
     const target = document.querySelector(href);
     if (target) {
       const headerOffset = 80;
@@ -82,7 +93,7 @@ export default function Navbar() {
 
         {/* Desktop Nav Links */}
         <nav className="hidden md:flex items-center gap-6">
-          {navLinks.map((link) => {
+          {NAV_LINKS.map((link) => {
             const isActive = activeSection === link.href;
             return (
               <a
@@ -103,13 +114,26 @@ export default function Navbar() {
             );
           })}
 
-          <button 
-            disabled
-            className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-white/5 border border-white/10 px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-on-surface-variant/60 cursor-not-allowed transition-all duration-300"
-          >
-            Apply
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary-fixed-dim font-bold border border-primary/20">COMING SOON</span>
-          </button>
+          {APPLICATIONS_OPEN ? (
+            <a
+              href="/apply"
+              className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-cyber-blue to-primary-container px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-glow-blue transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
+            >
+              <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              Apply
+              <ArrowRight size={14} className="relative z-10 text-secondary-fixed" />
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              title="Applications opening soon"
+              className="relative flex cursor-not-allowed items-center gap-2 rounded-full bg-on-surface/10 px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-on-surface-variant/50 opacity-60"
+            >
+              Apply
+              <ArrowRight size={14} className="relative z-10" />
+            </button>
+          )}
         </nav>
 
         {/* Mobile Menu Toggle Button */}
@@ -126,7 +150,7 @@ export default function Navbar() {
       {isOpen && (
         <div className="absolute top-20 left-0 right-0 border-b border-primary/10 bg-background/95 backdrop-blur-2xl p-6 md:hidden shadow-2xl animate-fadeIn">
           <div className="flex flex-col gap-4">
-            {navLinks.map((link) => {
+            {NAV_LINKS.map((link) => {
               const isActive = activeSection === link.href;
               return (
                 <a
@@ -145,13 +169,26 @@ export default function Navbar() {
               );
             })}
             
-            <button 
-              disabled
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 py-4 text-center text-sm font-bold uppercase tracking-wider text-on-surface-variant/60 cursor-not-allowed"
-            >
-              Apply
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/10 text-primary-fixed-dim font-bold border border-primary/20">COMING SOON</span>
-            </button>
+            {APPLICATIONS_OPEN ? (
+              <a
+                href="/apply"
+                onClick={() => setIsOpen(false)}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyber-blue to-primary-container py-4 text-center text-sm font-bold uppercase tracking-wider text-white shadow-glow-blue"
+              >
+                Apply
+                <ArrowRight size={16} className="text-secondary-fixed" />
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                title="Applications opening soon"
+                className="mt-4 flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-on-surface/10 py-4 text-center text-sm font-bold uppercase tracking-wider text-on-surface-variant/50 opacity-60"
+              >
+                Apply
+                <ArrowRight size={16} />
+              </button>
+            )}
           </div>
         </div>
       )}

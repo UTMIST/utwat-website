@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, Terminal, Cpu } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar, MapPin, Terminal } from 'lucide-react';
 import handImg from '../assets/hand.png';
 import wataiLogoImg from '../assets/wat-ai-logo.avif';
 import utmistLogoWithTextImg from '../assets/utmist-logo-with-text.png';

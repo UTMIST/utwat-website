@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function UtmistLogo({ className = "w-8 h-8", color = "currentColor" }) {
   return (
     <svg 
