@@ -50,6 +50,25 @@ function joinArrayForForm(value) {
   return Array.isArray(value) ? value.join(', ') : '';
 }
 
+async function toFunctionError(error) {
+  const fallbackMessage = error?.message || 'Edge Function request failed.';
+
+  if (!error?.context || typeof error.context.json !== 'function') {
+    return new Error(fallbackMessage);
+  }
+
+  try {
+    const payload = await error.context.json();
+    if (payload?.error) {
+      return new Error(payload.error);
+    }
+  } catch {
+    // Ignore JSON parsing issues and fall back to the original error message.
+  }
+
+  return new Error(fallbackMessage);
+}
+
 export function applicationRecordToForm(application) {
   if (!application) {
     return { ...emptyApplicationForm };
@@ -78,10 +97,12 @@ export function applicationRecordToForm(application) {
   };
 }
 
-export function formToApplicationPayload(formData, user, extra = {}) {
+// Draft-content columns only. Server-owned columns (user_id, email, status,
+// submitted_at, updated_at, admin_notes, decided_*) are NOT included: the
+// `authenticated` role has no column privilege to write them, and the DB
+// trigger/RPC own them. See docs/admissions-security-hardening.md.
+export function formToApplicationPayload(formData) {
   return {
-    user_id: user.id,
-    email: user.email,
     ...FORM_COLUMNS.reduce((acc, key) => {
       acc[key] = formData[key];
       return acc;
@@ -100,7 +121,6 @@ export function formToApplicationPayload(formData, user, extra = {}) {
       acc[key] = Boolean(formData[key]);
       return acc;
     }, {}),
-    ...extra,
   };
 }
 
@@ -145,17 +165,14 @@ export async function getOrCreateApplication(user) {
   return data;
 }
 
-export async function saveApplicationDraft(formData, user, application) {
+export async function saveApplicationDraft(formData, application) {
   const client = requireSupabase();
-  const payload = formToApplicationPayload(formData, user, {
-    id: application.id,
-    status: 'incomplete',
-    updated_at: new Date().toISOString(),
-  });
+  const payload = formToApplicationPayload(formData);
 
   const { data, error } = await client
     .from('applications')
-    .upsert(payload, { onConflict: 'id' })
+    .update(payload)
+    .eq('id', application.id)
     .select('*')
     .single();
 
@@ -166,20 +183,18 @@ export async function saveApplicationDraft(formData, user, application) {
   return data;
 }
 
-export async function submitApplication(formData, user, application) {
+export async function submitApplication(formData, application) {
   const client = requireSupabase();
-  const payload = formToApplicationPayload(formData, user, {
-    id: application.id,
-    status: 'submitted',
-    submitted_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  });
 
-  const { data, error } = await client
-    .from('applications')
-    .upsert(payload, { onConflict: 'id' })
-    .select('*')
-    .single();
+  // Persist the latest draft content through the column-restricted update path,
+  // then flip status server-side. The RPC enforces ownership, the
+  // incomplete->submitted transition, and the deadline; applicants have no
+  // direct write access to `status`/`submitted_at`.
+  await saveApplicationDraft(formData, application);
+
+  const { data, error } = await client.rpc('submit_application', {
+    p_application_id: application.id,
+  });
 
   if (error) {
     throw error;
@@ -207,10 +222,7 @@ export async function uploadResume(file, user, applicationId) {
 
   const { data, error } = await client
     .from('applications')
-    .update({
-      resume_path: path,
-      updated_at: new Date().toISOString(),
-    })
+    .update({ resume_path: path })
     .eq('id', applicationId)
     .select('*')
     .single();
@@ -237,10 +249,7 @@ export async function removeResume(applicationId, path) {
 
   const { data, error } = await client
     .from('applications')
-    .update({
-      resume_path: null,
-      updated_at: new Date().toISOString(),
-    })
+    .update({ resume_path: null })
     .eq('id', applicationId)
     .select('*')
     .single();
@@ -266,7 +275,7 @@ export async function listAdminApplications(filters = {}) {
   );
 
   if (error) {
-    throw error;
+    throw await toFunctionError(error);
   }
 
   return data.applications || [];
@@ -286,7 +295,7 @@ export async function updateAdminApplication(applicationId, updates) {
   );
 
   if (error) {
-    throw error;
+    throw await toFunctionError(error);
   }
 
   return data.application;
@@ -306,7 +315,7 @@ export async function createAdminResumeUrl(path) {
   );
 
   if (error) {
-    throw error;
+    throw await toFunctionError(error);
   }
 
   return data.url;

@@ -1,11 +1,11 @@
-import { useRef, useState } from 'react';
-import { FileText, Trash2, Upload } from 'lucide-react';
-import { portalConfig } from './portalConfig';
+import { useRef, useState } from "react";
+import { FileText, Trash2, Upload } from "lucide-react";
+import { portalConfig } from "./portalConfig";
 
 function Field({
   label,
   name,
-  type = 'text',
+  type = "text",
   value,
   onChange,
   error,
@@ -21,14 +21,14 @@ function Field({
       </span>
       <input
         className={`w-full rounded-xl border bg-surface-container-lowest/90 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-outline focus:border-primary/50 ${
-          error ? 'border-rose-400/50' : 'border-primary/10'
-        } ${disabled ? 'cursor-not-allowed opacity-70' : ''}`}
+          error ? "border-rose-400/50" : "border-primary/10"
+        } ${disabled ? "cursor-not-allowed opacity-70" : ""}`}
         disabled={disabled}
         name={name}
         onChange={onChange}
         placeholder={placeholder}
         type={type}
-        value={value || ''}
+        value={value || ""}
       />
       {error && <p className="mt-2 text-xs text-rose-300">{error}</p>}
     </label>
@@ -53,12 +53,12 @@ function SelectField({
       </span>
       <select
         className={`w-full rounded-xl border bg-surface-container-lowest/90 px-4 py-3 text-sm text-white outline-none transition-all focus:border-primary/50 ${
-          error ? 'border-rose-400/50' : 'border-primary/10'
-        } ${disabled ? 'cursor-not-allowed opacity-70' : ''}`}
+          error ? "border-rose-400/50" : "border-primary/10"
+        } ${disabled ? "cursor-not-allowed opacity-70" : ""}`}
         disabled={disabled}
         name={name}
         onChange={onChange}
-        value={value || ''}
+        value={value || ""}
       >
         {options.map((option) => (
           <option key={option} value={option}>
@@ -90,14 +90,14 @@ function TextAreaField({
       </span>
       <textarea
         className={`w-full rounded-xl border bg-surface-container-lowest/90 px-4 py-3 text-sm leading-relaxed text-white outline-none transition-all placeholder:text-outline focus:border-primary/50 ${
-          error ? 'border-rose-400/50' : 'border-primary/10'
-        } ${disabled ? 'cursor-not-allowed opacity-70' : ''}`}
+          error ? "border-rose-400/50" : "border-primary/10"
+        } ${disabled ? "cursor-not-allowed opacity-70" : ""}`}
         disabled={disabled}
         name={name}
         onChange={onChange}
         placeholder={placeholder}
         rows={rows}
-        value={value || ''}
+        value={value || ""}
       />
       {error && <p className="mt-2 text-xs text-rose-300">{error}</p>}
     </label>
@@ -117,7 +117,9 @@ function CheckboxField({ label, name, checked, onChange, error, disabled }) {
       />
       <span>
         {label}
-        {error && <span className="mt-2 block text-xs text-rose-300">{error}</span>}
+        {error && (
+          <span className="mt-2 block text-xs text-rose-300">{error}</span>
+        )}
       </span>
     </label>
   );
@@ -154,38 +156,38 @@ export default function ApplicationForm({
   onResumeUpload,
   onResumeRemove,
 }) {
-  const [fileError, setFileError] = useState('');
+  const [fileError, setFileError] = useState("");
   const fileInputRef = useRef(null);
 
   const handleChange = (event) => {
     const { name, type, checked, value } = event.target;
     onChange({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
   const handleResumeChange = async (event) => {
-    setFileError('');
+    setFileError("");
     const file = event.target.files?.[0];
     if (!file) {
       return;
     }
 
-    if (file.type !== 'application/pdf') {
-      setFileError('Resume must be a PDF.');
-      event.target.value = '';
+    if (file.type !== "application/pdf") {
+      setFileError("Resume must be a PDF.");
+      event.target.value = "";
       return;
     }
 
     if (file.size > portalConfig.maxResumeBytes) {
-      setFileError('Resume must be 10 MB or smaller.');
-      event.target.value = '';
+      setFileError("Resume must be 10 MB or smaller.");
+      event.target.value = "";
       return;
     }
 
     await onResumeUpload(file);
-    event.target.value = '';
+    event.target.value = "";
   };
 
   const disabled = readOnly || deadlinePassed;
@@ -216,7 +218,7 @@ export default function ApplicationForm({
             disabled
             label="Application Email"
             name="email"
-            value={application?.email || ''}
+            value={application?.email || ""}
           />
           <Field
             disabled={disabled}
@@ -299,7 +301,13 @@ export default function ApplicationForm({
             label="ML Skill Level"
             name="ml_skill_level"
             onChange={handleChange}
-            options={['1', '2', '3', '4', '5']}
+            options={[
+              "Beginner",
+              "Intermediate",
+              "Advanced",
+              "Expert",
+              "Master",
+            ]}
             value={formData.ml_skill_level}
           />
           <SelectField
@@ -307,7 +315,7 @@ export default function ApplicationForm({
             label="Hackathons Attended"
             name="hackathon_count"
             onChange={handleChange}
-            options={['0', '1', '2', '3', '4', '5+']}
+            options={["0", "1", "2", "3", "4", "5+"]}
             value={formData.hackathon_count}
           />
         </div>
@@ -359,10 +367,12 @@ export default function ApplicationForm({
               </div>
               <p className="mt-2 text-sm text-on-surface-variant">
                 {application?.resume_path
-                  ? 'Resume uploaded.'
-                  : 'Upload a PDF resume, 10 MB max.'}
+                  ? "Resume uploaded."
+                  : "Upload a PDF resume, 10 MB max."}
               </p>
-              {fileError && <p className="mt-2 text-xs text-rose-300">{fileError}</p>}
+              {fileError && (
+                <p className="mt-2 text-xs text-rose-300">{fileError}</p>
+              )}
             </div>
             <div className="flex flex-wrap gap-3">
               <input
@@ -380,7 +390,7 @@ export default function ApplicationForm({
                 type="button"
               >
                 <Upload size={14} />
-                {uploadingResume ? 'Uploading...' : 'Upload'}
+                {uploadingResume ? "Uploading..." : "Upload"}
               </button>
               {application?.resume_path && (
                 <button
@@ -416,10 +426,10 @@ export default function ApplicationForm({
             name="team_intent"
             onChange={handleChange}
             options={[
-              'Applying solo',
-              'Applying with a team',
-              'Looking for teammates',
-              'Not sure yet',
+              "Applying solo",
+              "Applying with a team",
+              "Looking for teammates",
+              "Not sure yet",
             ]}
             value={formData.team_intent}
           />
@@ -466,7 +476,7 @@ export default function ApplicationForm({
         <TextAreaField
           disabled={disabled}
           error={errors.future_build}
-          label="What are you excited to build in the next 10 years?"
+          label="What are you bullish about?"
           name="future_build"
           onChange={handleChange}
           required
@@ -502,14 +512,6 @@ export default function ApplicationForm({
 
       <FormSection kicker="05 // Agreements" title="Final Checks">
         <CheckboxField
-          checked={formData.agree_code_of_conduct}
-          disabled={disabled}
-          error={errors.agree_code_of_conduct}
-          label="I agree to follow the Battle of the Schools code of conduct."
-          name="agree_code_of_conduct"
-          onChange={handleChange}
-        />
-        <CheckboxField
           checked={formData.agree_privacy}
           disabled={disabled}
           error={errors.agree_privacy}
@@ -533,10 +535,10 @@ export default function ApplicationForm({
             <FileText size={18} className="mt-0.5 shrink-0 text-primary" />
             <span>
               {readOnly
-                ? 'Your submitted application is locked.'
+                ? "Your submitted application is locked."
                 : deadlinePassed
-                  ? 'The application deadline has passed.'
-                  : 'Save your draft anytime. Submit only when you are ready.'}
+                  ? "The application deadline has passed."
+                  : "Save your draft anytime. Submit only when you are ready."}
             </span>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -546,14 +548,14 @@ export default function ApplicationForm({
               onClick={onSave}
               type="button"
             >
-              {saving ? 'Saving...' : 'Save Draft'}
+              {saving ? "Saving..." : "Save Draft"}
             </button>
             <button
               className="rounded-full bg-gradient-to-r from-cyber-blue to-primary-container px-8 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-white shadow-glow-blue transition-all hover:scale-[1.01] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               disabled={disabled || saving || submitting}
               type="submit"
             >
-              {submitting ? 'Submitting...' : 'Submit Application'}
+              {submitting ? "Submitting..." : "Submit Application"}
             </button>
           </div>
         </div>

@@ -1,41 +1,32 @@
-import { useState } from 'react';
-import { Calendar, MapPin, Terminal } from 'lucide-react';
-import handImg from '../assets/hand.png';
-import wataiLogoImg from '../assets/wat-ai-logo.avif';
-import utmistLogoWithTextImg from '../assets/utmist-logo-with-text.png';
+import { useState } from "react";
+import { Calendar, MapPin, Terminal } from "lucide-react";
+import handImg from "../assets/hand.png";
+import wataiLogoImg from "../assets/wat-ai-logo.avif";
+import utmistLogoWithTextImg from "../assets/utmist-logo-with-text.png";
 
 export default function Hero() {
   const [isHovered, setIsHovered] = useState(false);
-
-  const handleScroll = (selector) => {
-    const el = document.querySelector(selector);
-    if (el) {
-      const offset = 80;
-      window.scrollTo({
-        top: el.offsetTop - offset,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   return (
     <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden py-16">
       {/* Background Graphic System */}
       <div className="absolute inset-0 z-0 bg-transparent">
         <div className="absolute top-1/4 left-1/4 h-[400px] w-[400px] rounded-full bg-primary-container/20 blur-[120px] animate-pulse-slow" />
-        <div className="absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-secondary-container/10 blur-[130px] animate-pulse-slow" style={{ animationDelay: '3s' }} />
+        <div
+          className="absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-secondary-container/10 blur-[130px] animate-pulse-slow"
+          style={{ animationDelay: "3s" }}
+        />
         <div className="absolute inset-0 network-pattern opacity-15" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-transparent" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-5xl px-gutter text-center">
-        
         {/* Location & Time Indicator badge */}
         <div className="inline-block animate-float rounded-full border border-primary/20 bg-primary-container/10 px-6 py-2 backdrop-blur-md mb-8">
           <span className="flex items-center justify-center gap-3 font-mono text-xs font-semibold tracking-wider text-primary-fixed-dim uppercase">
-            <MapPin size={14} className="text-secondary-fixed animate-pulse" /> 
+            <MapPin size={14} className="text-secondary-fixed animate-pulse" />
             TORONTO, ONTARIO, CANADA
-            <span className="h-1.5 w-1.5 rounded-full bg-primary/45" /> 
+            <span className="h-1.5 w-1.5 rounded-full bg-primary/45" />
             <Calendar size={14} className="text-primary" />
             LATE SUMMER 2026
           </span>
@@ -47,26 +38,38 @@ export default function Hero() {
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          <div 
+          <div
             className="relative transition-transform duration-500 flex flex-col items-center"
-            style={{ transform: isHovered ? 'scale(1.02) translateY(-4px)' : 'none' }}
+            style={{
+              transform: isHovered ? "scale(1.02) translateY(-4px)" : "none",
+            }}
           >
             {/* Layer 1: Box Background & Border */}
             <div className="absolute inset-0 rounded-[1.5rem] border border-primary/40 bg-surface-container-lowest/40 backdrop-blur-sm shadow-[0_0_40px_rgba(46,91,255,0.15)] z-0" />
-            
+
             {/* Layer 2: Hand Image */}
-            <img 
+            <img
               src={handImg}
               alt=""
               className="absolute -bottom-56 sm:-bottom-72 left-1/2 -translate-x-1/2 w-[110%] max-w-[700px] pointer-events-none z-10"
-              style={{ objectFit: 'contain' }}
+              style={{ objectFit: "contain" }}
             />
 
             {/* Presenters Badge */}
             <div className="relative z-20 mt-8 sm:mt-10 flex items-center gap-3.5 select-none">
-              <img src={utmistLogoWithTextImg} alt="UTMIST" className="h-8 sm:h-11 w-auto object-contain" />
-              <span className="text-white/25 text-xs sm:text-sm font-mono font-bold">x</span>
-              <img src={wataiLogoImg} alt="Wat.ai" className="h-8 sm:h-11 w-auto object-contain" />
+              <img
+                src={utmistLogoWithTextImg}
+                alt="UTMIST"
+                className="h-8 sm:h-11 w-auto object-contain"
+              />
+              <span className="text-white/25 text-xs sm:text-sm font-mono font-bold">
+                x
+              </span>
+              <img
+                src={wataiLogoImg}
+                alt="Wat.ai"
+                className="h-8 sm:h-11 w-auto object-contain"
+              />
             </div>
 
             {/* Layer 3: Text */}
@@ -81,16 +84,24 @@ export default function Hero() {
         </div>
 
         <p className="relative z-10 font-sans text-base sm:text-xl text-on-surface-variant max-w-3xl mx-auto mb-10 leading-relaxed font-light">
-          The ultimate inter-collegiate arena for the next generation of AI pioneers. Represent your school, solve challenging ML problems, and claim the ultimate glory for your institution.
+          The ultimate inter-collegiate arena for the next generation of AI
+          pioneers. Represent your school, solve challenging ML problems, and
+          claim the ultimate glory for your institution.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-          <button onClick={() => handleScroll('#organizations')} className="group relative flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-cyber-blue to-primary-container px-10 py-5 text-sm font-bold uppercase tracking-widest text-white shadow-glow-blue transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]">
+          <a
+            href="/apply"
+            className="group relative flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-cyber-blue to-primary-container px-10 py-5 text-sm font-bold uppercase tracking-widest text-white shadow-glow-blue transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
+          >
             <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Terminal size={16} className="text-secondary-fixed animate-pulse" />
+            <Terminal
+              size={16}
+              className="text-secondary-fixed animate-pulse"
+            />
             Enter the Arena
-          </button>
-          
+          </a>
+
           {/* <button onClick={() => handleScroll('#missions')} className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-10 py-5 text-sm font-bold uppercase tracking-widest text-primary-fixed-dim hover:border-primary hover:bg-primary/10 transition-all duration-300 active:scale-[0.98]">
             <Cpu size={16} className="text-secondary-container" />
             View Missions

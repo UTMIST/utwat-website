@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import {
   Download,
   ExternalLink,
@@ -6,69 +6,92 @@ import {
   RefreshCw,
   Search,
   ShieldAlert,
-} from 'lucide-react';
-import AuthPanel from '../admissions/AuthPanel';
-import PortalShell from '../admissions/PortalShell';
-import StatusBadge from '../admissions/StatusBadge';
+} from "lucide-react";
+import AuthPanel from "../admissions/AuthPanel";
+import PortalShell from "../admissions/PortalShell";
+import StatusBadge from "../admissions/StatusBadge";
 import {
   createAdminResumeUrl,
   listAdminApplications,
   updateAdminApplication,
-} from '../admissions/applicationService';
-import { portalConfig } from '../admissions/portalConfig';
-import { supabase } from '../admissions/supabaseClient';
-import { useSupabaseSession } from '../admissions/useSupabaseSession';
+} from "../admissions/applicationService";
+import { portalConfig } from "../admissions/portalConfig";
+import { supabase } from "../admissions/supabaseClient";
+import { useSupabaseSession } from "../admissions/useSupabaseSession";
 
 const statusOptions = Object.keys(portalConfig.statuses);
 
 function formatDate(value) {
   if (!value) {
-    return '-';
+    return "-";
   }
 
-  return new Intl.DateTimeFormat('en-CA', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'America/Toronto',
+  return new Intl.DateTimeFormat("en-CA", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "America/Toronto",
   }).format(new Date(value));
 }
 
+// Only allow http(s) links to render as clickable anchors. Applicant-controlled
+// link values reach here; a `javascript:`/`data:` href would execute in the
+// admin origin (stored XSS -> session takeover). Anything else renders inert.
+function safeHref(value) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+    if (url.protocol === "http:" || url.protocol === "https:") {
+      return url.href;
+    }
+  } catch {
+    // Not a parseable absolute URL.
+  }
+
+  return null;
+}
+
 function csvEscape(value) {
-  const text = value == null ? '' : String(value);
+  let text = value == null ? "" : String(value);
+  // Neutralize spreadsheet formula injection: a leading =, +, -, @, tab, or CR
+  // can execute when the export is opened in Excel/Sheets.
+  if (/^[=+\-@\t\r]/.test(text)) {
+    text = `'${text}`;
+  }
   return `"${text.replaceAll('"', '""')}"`;
 }
 
 function buildCsv(applications) {
   const headers = [
-    'email',
-    'status',
-    'first_name',
-    'last_name',
-    'school',
-    'program',
-    'preferred_track',
-    'team_intent',
-    'submitted_at',
-    'admin_notes',
+    "email",
+    "status",
+    "first_name",
+    "last_name",
+    "school",
+    "program",
+    "preferred_track",
+    "team_intent",
+    "submitted_at",
+    "admin_notes",
   ];
 
   const rows = applications.map((application) =>
-    headers
-      .map((header) => csvEscape(application[header]))
-      .join(','),
+    headers.map((header) => csvEscape(application[header])).join(","),
   );
 
-  return [headers.join(','), ...rows].join('\n');
+  return [headers.join(","), ...rows].join("\n");
 }
 
 function downloadCsv(applications) {
   const blob = new Blob([buildCsv(applications)], {
-    type: 'text/csv;charset=utf-8',
+    type: "text/csv;charset=utf-8",
   });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
-  link.download = 'bots-applications.csv';
+  link.download = "bots-applications.csv";
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -80,7 +103,7 @@ function DetailText({ label, children }) {
         {label}
       </div>
       <div className="mt-1 text-sm leading-relaxed text-on-surface-variant">
-        {children || '-'}
+        {children || "-"}
       </div>
     </div>
   );
@@ -94,7 +117,7 @@ function ApplicationDetail({
   onOpenResume,
 }) {
   const [status, setStatus] = useState(application.status);
-  const [adminNotes, setAdminNotes] = useState(application.admin_notes || '');
+  const [adminNotes, setAdminNotes] = useState(application.admin_notes || "");
 
   return (
     <aside className="glass-panel rounded-3xl border border-primary/10 bg-surface-container-lowest/90 p-6 backdrop-blur-2xl lg:sticky lg:top-6">
@@ -104,7 +127,7 @@ function ApplicationDetail({
             Applicant
           </div>
           <h2 className="mt-2 font-display text-2xl font-black uppercase text-white">
-            {application.first_name || 'Unnamed'} {application.last_name || ''}
+            {application.first_name || "Unnamed"} {application.last_name || ""}
           </h2>
           <p className="mt-1 text-sm text-on-surface-variant">
             {application.email}
@@ -128,7 +151,7 @@ function ApplicationDetail({
         </DetailText>
         <DetailText label="Team Intent">{application.team_intent}</DetailText>
         <DetailText label="Teammates">
-          {(application.team_emails || []).join(', ')}
+          {(application.team_emails || []).join(", ")}
         </DetailText>
       </div>
 
@@ -136,18 +159,35 @@ function ApplicationDetail({
         <DetailText label="Links">
           {Object.entries(application.links || {})
             .filter(([, value]) => value)
-            .map(([key, value]) => (
-              <a
-                className="mr-3 inline-flex items-center gap-1 text-primary hover:text-primary-fixed-dim"
-                href={value}
-                key={key}
-                rel="noreferrer"
-                target="_blank"
-              >
-                {key.replace('_url', '')}
-                <ExternalLink size={12} />
-              </a>
-            ))}
+            .map(([key, value]) => {
+              const href = safeHref(value);
+              const label = key.replace("_url", "");
+
+              if (!href) {
+                return (
+                  <span
+                    className="mr-3 inline-flex items-center gap-1 text-outline line-through"
+                    key={key}
+                    title={`Blocked non-http link: ${value}`}
+                  >
+                    {label}
+                  </span>
+                );
+              }
+
+              return (
+                <a
+                  className="mr-3 inline-flex items-center gap-1 text-primary hover:text-primary-fixed-dim"
+                  href={href}
+                  key={key}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {label}
+                  <ExternalLink size={12} />
+                </a>
+              );
+            })}
         </DetailText>
 
         {application.resume_path && (
@@ -164,12 +204,12 @@ function ApplicationDetail({
 
       <div className="mt-6 space-y-5 border-t border-white/10 pt-6">
         {[
-          ['Why BOTS', application.responses?.why_bots],
-          ['Project', application.responses?.project_story],
-          ['Future Build', application.responses?.future_build],
-          ['Team Contribution', application.responses?.team_contribution],
-          ['Anything Else', application.responses?.anything_else],
-          ['Joke', application.responses?.joke],
+          ["Why BOTS", application.responses?.why_bots],
+          ["Project", application.responses?.project_story],
+          ["Future Build", application.responses?.future_build],
+          ["Team Contribution", application.responses?.team_contribution],
+          ["Anything Else", application.responses?.anything_else],
+          ["Joke", application.responses?.joke],
         ].map(([label, value]) => (
           <DetailText key={label} label={label}>
             {value}
@@ -210,10 +250,12 @@ function ApplicationDetail({
         <button
           className="w-full rounded-full bg-gradient-to-r from-cyber-blue to-primary-container px-6 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-white shadow-glow-blue disabled:cursor-not-allowed disabled:opacity-60"
           disabled={updating}
-          onClick={() => onUpdate(application.id, { status, admin_notes: adminNotes })}
+          onClick={() =>
+            onUpdate(application.id, { status, admin_notes: adminNotes })
+          }
           type="button"
         >
-          {updating ? 'Saving...' : 'Save Decision'}
+          {updating ? "Saving..." : "Save Decision"}
         </button>
       </div>
     </aside>
@@ -224,11 +266,11 @@ export default function AdmissionsAdminPage() {
   const { configured, loading, user } = useSupabaseSession();
   const [applications, setApplications] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [schoolFilter, setSchoolFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [pageError, setPageError] = useState('');
-  const [pageMessage, setPageMessage] = useState('');
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [schoolFilter, setSchoolFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pageError, setPageError] = useState("");
+  const [pageMessage, setPageMessage] = useState("");
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [updating, setUpdating] = useState(false);
 
@@ -240,9 +282,9 @@ export default function AdmissionsAdminPage() {
     const search = searchTerm.trim().toLowerCase();
     return applications.filter((application) => {
       const matchesStatus =
-        statusFilter === 'all' || application.status === statusFilter;
+        statusFilter === "all" || application.status === statusFilter;
       const matchesSchool =
-        schoolFilter === 'all' || application.school === schoolFilter;
+        schoolFilter === "all" || application.school === schoolFilter;
       const matchesSearch =
         !search ||
         [
@@ -254,7 +296,7 @@ export default function AdmissionsAdminPage() {
           application.preferred_track,
         ]
           .filter(Boolean)
-          .join(' ')
+          .join(" ")
           .toLowerCase()
           .includes(search);
 
@@ -264,8 +306,8 @@ export default function AdmissionsAdminPage() {
 
   const loadApplications = async () => {
     setLoadingApplications(true);
-    setPageError('');
-    setPageMessage('');
+    setPageError("");
+    setPageMessage("");
     try {
       const records = await listAdminApplications();
       setApplications(records);
@@ -273,7 +315,7 @@ export default function AdmissionsAdminPage() {
         setSelectedId(records[0].id);
       }
     } catch (error) {
-      setPageError(error.message || 'Unable to load applications.');
+      setPageError(error.message || "Unable to load applications.");
     } finally {
       setLoadingApplications(false);
     }
@@ -294,8 +336,8 @@ export default function AdmissionsAdminPage() {
 
   const handleUpdate = async (applicationId, updates) => {
     setUpdating(true);
-    setPageError('');
-    setPageMessage('');
+    setPageError("");
+    setPageMessage("");
     try {
       const updated = await updateAdminApplication(applicationId, updates);
       setApplications((current) =>
@@ -303,21 +345,21 @@ export default function AdmissionsAdminPage() {
           application.id === updated.id ? updated : application,
         ),
       );
-      setPageMessage('Application updated.');
+      setPageMessage("Application updated.");
     } catch (error) {
-      setPageError(error.message || 'Unable to update application.');
+      setPageError(error.message || "Unable to update application.");
     } finally {
       setUpdating(false);
     }
   };
 
   const handleOpenResume = async (path) => {
-    setPageError('');
+    setPageError("");
     try {
       const url = await createAdminResumeUrl(path);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(url, "_blank", "noopener,noreferrer");
     } catch (error) {
-      setPageError(error.message || 'Unable to create resume link.');
+      setPageError(error.message || "Unable to create resume link.");
     }
   };
 
@@ -343,7 +385,9 @@ export default function AdmissionsAdminPage() {
         </div>
       )}
 
-      {configured && !loading && !user && <AuthPanel redirectPath="/apply/admin" />}
+      {configured && !loading && !user && (
+        <AuthPanel redirectPath="/apply/admin" />
+      )}
 
       {configured && user && (
         <div className="space-y-6">
@@ -425,7 +469,7 @@ export default function AdmissionsAdminPage() {
             <div className="overflow-hidden rounded-3xl border border-primary/10 bg-surface-container-lowest/80">
               <div className="border-b border-white/10 px-5 py-4 font-mono text-[10px] font-bold uppercase tracking-widest text-outline">
                 {loadingApplications
-                  ? 'Loading applications...'
+                  ? "Loading applications..."
                   : `${filteredApplications.length} applications`}
               </div>
 
@@ -444,25 +488,25 @@ export default function AdmissionsAdminPage() {
                     {filteredApplications.map((application) => (
                       <tr
                         className={`cursor-pointer transition-colors hover:bg-primary/5 ${
-                          selectedId === application.id ? 'bg-primary/10' : ''
+                          selectedId === application.id ? "bg-primary/10" : ""
                         }`}
                         key={application.id}
                         onClick={() => setSelectedId(application.id)}
                       >
                         <td className="px-5 py-4">
                           <div className="font-semibold text-white">
-                            {application.first_name || 'Unnamed'}{' '}
-                            {application.last_name || ''}
+                            {application.first_name || "Unnamed"}{" "}
+                            {application.last_name || ""}
                           </div>
                           <div className="text-xs text-outline">
                             {application.email}
                           </div>
                         </td>
                         <td className="px-5 py-4 text-on-surface-variant">
-                          {application.school || '-'}
+                          {application.school || "-"}
                         </td>
                         <td className="px-5 py-4 text-on-surface-variant">
-                          {application.preferred_track || '-'}
+                          {application.preferred_track || "-"}
                         </td>
                         <td className="px-5 py-4">
                           <StatusBadge status={application.status} />

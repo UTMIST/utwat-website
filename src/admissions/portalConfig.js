@@ -66,7 +66,7 @@ export const emptyApplicationForm = {
   graduation_year: portalConfig.graduationYears[1],
   over_18: false,
   can_attend_in_person: false,
-  ml_skill_level: '3',
+  ml_skill_level: 'Intermediate',
   hackathon_count: '0',
   github_url: '',
   linkedin_url: '',
@@ -107,7 +107,6 @@ export const requiredApplicationFields = [
 export const requiredApplicationBooleans = [
   'over_18',
   'can_attend_in_person',
-  'agree_code_of_conduct',
   'agree_privacy',
   'agree_accuracy',
 ];

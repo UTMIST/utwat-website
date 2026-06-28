@@ -173,7 +173,7 @@ export default function AdmissionsPage() {
     setPageError('');
     setPageMessage('');
     try {
-      const record = await saveApplicationDraft(formData, user, application);
+      const record = await saveApplicationDraft(formData, application);
       setApplication(record);
       setFormData(applicationRecordToForm(record));
       setPageMessage('Draft saved.');
@@ -203,7 +203,7 @@ export default function AdmissionsPage() {
     setSubmitting(true);
     setPageError('');
     try {
-      const record = await submitApplication(formData, user, application);
+      const record = await submitApplication(formData, application);
       setApplication(record);
       setFormData(applicationRecordToForm(record));
       setPageMessage('Application submitted. Good luck!');
