@@ -1,12 +1,26 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Mail, Send } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 export default function AuthPanel({ redirectPath = '/apply' }) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
+  const turnstileRef = useRef(null);
+
+  // The widget only renders when a site key is configured, so local/dev
+  // builds without the key keep working (Supabase captcha must be off then).
+  const captchaEnabled = Boolean(TURNSTILE_SITE_KEY);
+
+  const resetCaptcha = () => {
+    setCaptchaToken('');
+    turnstileRef.current?.reset();
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -20,14 +34,25 @@ export default function AuthPanel({ redirectPath = '/apply' }) {
       return;
     }
 
+    if (captchaEnabled && !captchaToken) {
+      setError('Please complete the verification challenge first.');
+      return;
+    }
+
     setSending(true);
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}${redirectPath}`,
+        captchaToken: captchaToken || undefined,
       },
     });
     setSending(false);
+
+    // Turnstile tokens are single-use; reset after every attempt.
+    if (captchaEnabled) {
+      resetCaptcha();
+    }
 
     if (authError) {
       setError(authError.message);
@@ -78,9 +103,20 @@ export default function AuthPanel({ redirectPath = '/apply' }) {
             </div>
           )}
 
+          {captchaEnabled && (
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={TURNSTILE_SITE_KEY}
+              onSuccess={setCaptchaToken}
+              onError={() => setCaptchaToken('')}
+              onExpire={() => setCaptchaToken('')}
+              options={{ theme: 'dark' }}
+            />
+          )}
+
           <button
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-cyber-blue to-primary-container px-8 py-4 text-sm font-bold uppercase tracking-widest text-white shadow-glow-blue transition-all hover:scale-[1.01] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={sending}
+            disabled={sending || (captchaEnabled && !captchaToken)}
             type="submit"
           >
             <Send size={16} className="text-secondary-fixed" />
