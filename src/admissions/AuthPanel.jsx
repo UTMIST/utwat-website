@@ -3,7 +3,9 @@ import { Mail, Send } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+// .trim() strips stray whitespace / BOM that env tooling can prepend, which
+// would otherwise make Cloudflare reject the sitekey as malformed.
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim();
 
 export default function AuthPanel({ redirectPath = '/apply' }) {
   const [email, setEmail] = useState('');
@@ -11,6 +13,7 @@ export default function AuthPanel({ redirectPath = '/apply' }) {
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
   const turnstileRef = useRef(null);
 
   // The widget only renders when a site key is configured, so local/dev
@@ -104,14 +107,27 @@ export default function AuthPanel({ redirectPath = '/apply' }) {
           )}
 
           {captchaEnabled && (
-            <Turnstile
-              ref={turnstileRef}
-              siteKey={TURNSTILE_SITE_KEY}
-              onSuccess={setCaptchaToken}
-              onError={() => setCaptchaToken('')}
-              onExpire={() => setCaptchaToken('')}
-              options={{ theme: 'dark' }}
-            />
+            <div className="space-y-2">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={TURNSTILE_SITE_KEY}
+                onSuccess={(token) => {
+                  setCaptchaToken(token);
+                  setCaptchaError('');
+                }}
+                onError={() => {
+                  setCaptchaToken('');
+                  setCaptchaError(
+                    'Verification could not load. Refresh the page or disable any ad blocker, then try again.',
+                  );
+                }}
+                onExpire={() => setCaptchaToken('')}
+                options={{ theme: 'dark' }}
+              />
+              {captchaError && (
+                <p className="text-xs text-rose-300">{captchaError}</p>
+              )}
+            </div>
           )}
 
           <button
