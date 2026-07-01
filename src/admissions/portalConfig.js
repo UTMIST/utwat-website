@@ -73,13 +73,11 @@ export const emptyApplicationForm = {
   portfolio_url: '',
   devpost_url: '',
   preferred_track: portalConfig.tracks[0],
-  maple_cup_motivation: '',
   team_intent: 'Looking for teammates',
   teammate_emails: '',
   why_bots: '',
   project_story: '',
   future_build: '',
-  team_contribution: '',
   anything_else: '',
   joke: '',
   agree_code_of_conduct: false,
@@ -96,12 +94,9 @@ export const requiredApplicationFields = [
   'level_of_study',
   'graduation_year',
   'preferred_track',
-  'maple_cup_motivation',
   'why_bots',
   'project_story',
   'future_build',
-  'team_contribution',
-  'joke',
 ];
 
 export const requiredApplicationBooleans = [

@@ -443,15 +443,6 @@ export default function ApplicationForm({
           placeholder="Separate emails with commas. Everyone should apply individually."
           value={formData.teammate_emails}
         />
-        <TextAreaField
-          disabled={disabled}
-          error={errors.maple_cup_motivation}
-          label="What would winning the Maple Cup mean for your school?"
-          name="maple_cup_motivation"
-          onChange={handleChange}
-          required
-          value={formData.maple_cup_motivation}
-        />
       </FormSection>
 
       <FormSection kicker="04 // Short Answers" title="Application Questions">
@@ -484,15 +475,6 @@ export default function ApplicationForm({
         />
         <TextAreaField
           disabled={disabled}
-          error={errors.team_contribution}
-          label="How do you contribute to a team or community?"
-          name="team_contribution"
-          onChange={handleChange}
-          required
-          value={formData.team_contribution}
-        />
-        <TextAreaField
-          disabled={disabled}
           label="Anything else we should know?"
           name="anything_else"
           onChange={handleChange}
@@ -501,10 +483,9 @@ export default function ApplicationForm({
         <TextAreaField
           disabled={disabled}
           error={errors.joke}
-          label="Tell us a joke!"
+          label="Tell us a joke! (optional)"
           name="joke"
           onChange={handleChange}
-          required
           rows={3}
           value={formData.joke}
         />

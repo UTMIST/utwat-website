@@ -207,7 +207,6 @@ function ApplicationDetail({
           ["Why BOTS", application.responses?.why_bots],
           ["Project", application.responses?.project_story],
           ["Future Build", application.responses?.future_build],
-          ["Team Contribution", application.responses?.team_contribution],
           ["Anything Else", application.responses?.anything_else],
           ["Joke", application.responses?.joke],
         ].map(([label, value]) => (

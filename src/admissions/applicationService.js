@@ -14,7 +14,6 @@ const FORM_COLUMNS = [
   'ml_skill_level',
   'hackathon_count',
   'preferred_track',
-  'maple_cup_motivation',
 ];
 
 const LINK_FIELDS = [
@@ -28,7 +27,6 @@ const RESPONSE_FIELDS = [
   'why_bots',
   'project_story',
   'future_build',
-  'team_contribution',
   'anything_else',
   'joke',
 ];
